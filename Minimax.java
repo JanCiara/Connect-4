@@ -1,5 +1,6 @@
 public class Minimax {
     static int move = -1;
+    static int[] moveOrder = {3,2,4,1,5,6,0};
 
     public static int minimax(char[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         // base case
@@ -11,19 +12,19 @@ public class Minimax {
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
             for (int i = 0; i < board[0].length; i++) {
-                if (!Main.isValid(i))
+                if (!Main.isValid(moveOrder[i]))
                     continue;
 
-                Main.place(i, player);
+                Main.place(moveOrder[i], player);
                 int tmpEval = minimax(board, depth - 1, alpha, beta, false);
                 if (maxEval < tmpEval) {
                     maxEval = tmpEval;
                     if (depth == Main.depth)
-                        move = i;
+                        move = moveOrder[i];
                 }
-                Main.remove(i);
+                Main.remove(moveOrder[i]);
                 if (depth == Main.depth)
-                    System.out.println("Column: " + i + " Score: " + tmpEval);
+                    System.out.println("Column: " + moveOrder[i] + " Score: " + tmpEval);
 
                 // Alpha-beta pruning
                 if (maxEval > beta)
@@ -34,16 +35,16 @@ public class Minimax {
         } else {
             int minEval = Integer.MAX_VALUE;
             for (int i = 0; i < board[0].length; i++) {
-                if (!Main.isValid(i))
+                if (!Main.isValid(moveOrder[i]))
                     continue;
 
-                Main.place(i, player);
+                Main.place(moveOrder[i], player);
                 int tmpEval = minimax(board, depth - 1, alpha, beta, true);
 
                 if (minEval > tmpEval)
                     minEval = tmpEval;
 
-                Main.remove(i);
+                Main.remove(moveOrder[i]);
                 // Alpha-beta pruning
                 if (minEval < alpha)
                     break;

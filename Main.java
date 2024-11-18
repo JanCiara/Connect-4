@@ -10,7 +10,7 @@ public class Main {
 
     // Game state
     static char current_player = HUMAN;
-    static final byte depth =  10;
+    static final byte depth =  11;
 
     // Scanner
     static Scanner sc = new Scanner(System.in);
