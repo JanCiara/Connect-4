@@ -1,5 +1,4 @@
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -11,7 +10,7 @@ public class Main {
 
     // Game state
     static char current_player = HUMAN;
-    static final byte depth = 7;
+    static final byte depth =  7;
 
     // Scanner
     static Scanner sc = new Scanner(System.in);
@@ -46,9 +45,7 @@ public class Main {
         long startTime = System.nanoTime();
 
         // Call nagamax to get the best move
-        Map.Entry<Integer, Integer> eval_bestMove = Minimax.nagamax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, -1);
-        int res = eval_bestMove.getValue(); // best move
-
+        int res = Minimax.bestmove(board, depth);
         // Record the end time
         long endTime = System.nanoTime();
 
