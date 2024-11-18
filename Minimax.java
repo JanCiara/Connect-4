@@ -1,37 +1,52 @@
+import java.util.AbstractMap;
+import java.util.Map;
+
 public class Minimax {
-    public static int minimax(char[][] board, int depth, boolean maximizingPlayer) {
-
-        //char player = maximizingPlayer ? Main.AI : Main.HUMAN;
-
+    public static Map.Entry<Integer, Integer> minimax(char[][] board, int depth, boolean maximizingPlayer, int alpha, int beta, int idx) {
         // base case
         if (depth == 0 || Main.game_over()) {
-            return evaluation(board);
+            return new AbstractMap.SimpleEntry<>(evaluation(board), idx);
         }
 
         if (maximizingPlayer) {
+            // tmpEval (minEval, currBest)
+            Map.Entry<Integer, Integer> tmpEval;
+            int bestMove = -1;
             int maxEval = Integer.MIN_VALUE;
-
             for (int i = 0; i < board[0].length; i++) {
                 if (!Main.isValid(i))
                     continue;
 
                 Main.place(i, Main.AI);
-                maxEval = Math.max(Minimax.minimax(board, depth - 1, false), maxEval);
+                tmpEval = Minimax.minimax(board, depth - 1, false, alpha, beta, i);
+                if (tmpEval.getKey() > maxEval) {
+                    maxEval = tmpEval.getKey();
+                    bestMove = i;
+                }
                 Main.remove(i);
-            }
-            return maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE;
 
+                if (depth == Main.depth)
+                    System.out.println("Collumn: " + i + " Score: " + tmpEval.getKey());
+            }
+            return new AbstractMap.SimpleEntry<>(maxEval, bestMove);
+        } else {
+            // tmpEval (minEval, currBest)
+            Map.Entry<Integer, Integer> tmpEval;
+            int minEval = Integer.MAX_VALUE;
+            int bestMove = -1;
             for (int i = 0; i < board[0].length; i++) {
                 if (!Main.isValid(i))
                     continue;
 
                 Main.place(i, Main.HUMAN);
-                minEval = Math.min(Minimax.minimax(board, depth - 1, true), minEval);
+                tmpEval = Minimax.minimax(board, depth - 1, true, alpha, beta, i);
+                if (tmpEval.getKey() < minEval) {
+                    minEval = tmpEval.getKey();
+                    bestMove = i;
+                }
                 Main.remove(i);
             }
-            return minEval;
+            return new AbstractMap.SimpleEntry<>(minEval, bestMove);
         }
     }
 
@@ -60,8 +75,8 @@ public class Minimax {
         int AI_linesOfThree = countLinesOfThree(board, Main.AI);
         int HUMAN_linesOfThree = countLinesOfThree(board, Main.HUMAN);
 
-        score += AI_linesOfTwo * 5;
-        score -= HUMAN_linesOfTwo * 5;
+        score += AI_linesOfThree * 5;
+        score -= HUMAN_linesOfThree * 5;
 
         return score;
     }

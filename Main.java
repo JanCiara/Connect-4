@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -10,19 +11,18 @@ public class Main {
 
     // Game state
     static char current_player = HUMAN;
-    static final byte depth = 6;
+    static final byte depth = 7;
 
     // Scanner
     static Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         prepareBoard();
         do {
             move();
             message(HUMAN);
             change_player();
-            if(!game_over())
-            {
+            if (!game_over()) {
                 bestmove();
                 message(AI);
                 change_player();
@@ -30,40 +30,31 @@ public class Main {
         } while (!game_over());
     }
 
-    static void message(char player)
-    {
-        if (doesXwin(player))
-        {
+    static void message(char player) {
+        if (doesXwin(player)) {
             printBoard();
             System.out.println("\nPlayer: " + current_player + " won!");
         }
-        if (isDraw(board))
-        {
+        if (isDraw(board)) {
             printBoard();
             System.out.println("\nDraw!");
         }
     }
+
     static void bestmove() {
-        int bestMove = 0, currMove;
+        Map.Entry<Integer, Integer> eval_bestMove;
         int maxEval = Integer.MIN_VALUE, tmpEval;
+
+        // res is best i to place piece
+        int res;
 
         // Record the start time
         long startTime = System.nanoTime();
-
         System.out.println();
-        for (int i = 0; i < board[0].length; i++) {
-            if (!isValid(i))
-                continue;
 
-            place(i, AI);
-            tmpEval = Minimax.minimax(board, depth, false);
-            System.out.println("Evaluating column " + i + ": " + tmpEval);
-            if (tmpEval > maxEval) {
-                maxEval = tmpEval;
-                bestMove = i;
-            }
-            remove(i);
-        }
+        // alpha = -inf; beta = +inf
+        eval_bestMove = Minimax.minimax(board, depth, true, Integer.MIN_VALUE, Integer.MAX_VALUE, -1);
+        res = eval_bestMove.getValue();
 
         // Record the end time
         long endTime = System.nanoTime();
@@ -73,10 +64,10 @@ public class Main {
         double seconds = duration / 1_000_000_000.0; // Convert to seconds for readability
 
         // Print the results
-        System.out.print("\nAI made move: " + bestMove);
+        System.out.print("\nAI made move: " + res);
         System.out.printf("\nTime taken to calculate the move: %.3f seconds%n", seconds);
 
-        place(bestMove, AI);
+        place(res, AI);
     }
 
 
@@ -111,7 +102,7 @@ public class Main {
 
     }
 
-    static void remove(int column_number){
+    static void remove(int column_number) {
         for (int row = 0; row < board.length; row++) {
             if (board[row][column_number] != EMPTY) {
                 board[row][column_number] = EMPTY;
@@ -226,7 +217,7 @@ public class Main {
     // returns winner
     public static char LookForWinner(char[][] board) {
         char winner = ' ';
-        if(doesXwin(AI))
+        if (doesXwin(AI))
             winner = AI;
         else if (doesXwin(HUMAN))
             winner = HUMAN;
