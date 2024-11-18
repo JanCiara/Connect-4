@@ -42,19 +42,12 @@ public class Main {
     }
 
     static void bestmove() {
-        Map.Entry<Integer, Integer> eval_bestMove;
-        int maxEval = Integer.MIN_VALUE, tmpEval;
-
-        // res is best i to place piece
-        int res;
-
         // Record the start time
         long startTime = System.nanoTime();
-        System.out.println();
 
-        // alpha = -inf; beta = +inf
-        eval_bestMove = Minimax.minimax(board, depth, true, Integer.MIN_VALUE, Integer.MAX_VALUE, -1);
-        res = eval_bestMove.getValue();
+        // Call nagamax to get the best move
+        Map.Entry<Integer, Integer> eval_bestMove = Minimax.nagamax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, -1);
+        int res = eval_bestMove.getValue(); // best move
 
         // Record the end time
         long endTime = System.nanoTime();
@@ -64,12 +57,12 @@ public class Main {
         double seconds = duration / 1_000_000_000.0; // Convert to seconds for readability
 
         // Print the results
-        System.out.print("\nAI made move: " + res);
+        System.out.println();
+        System.out.print("AI made move: " + res);
         System.out.printf("\nTime taken to calculate the move: %.3f seconds%n", seconds);
 
-        place(res, AI);
+        place(res, AI); // Make the move
     }
-
 
     static void move() {
         printBoard();

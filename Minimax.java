@@ -2,52 +2,39 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 public class Minimax {
-    public static Map.Entry<Integer, Integer> minimax(char[][] board, int depth, boolean maximizingPlayer, int alpha, int beta, int idx) {
+    public static Map.Entry<Integer, Integer> nagamax(char[][] board, int depth, int alpha, int beta, int idx) {
         // base case
         if (depth == 0 || Main.game_over()) {
             return new AbstractMap.SimpleEntry<>(evaluation(board), idx);
         }
 
-        if (maximizingPlayer) {
-            // tmpEval (minEval, currBest)
-            Map.Entry<Integer, Integer> tmpEval;
-            int bestMove = -1;
-            int maxEval = Integer.MIN_VALUE;
-            for (int i = 0; i < board[0].length; i++) {
-                if (!Main.isValid(i))
-                    continue;
+        // tmpEval (maxEval, currBestMove)
+        Map.Entry<Integer, Integer> tmpEval;
 
-                Main.place(i, Main.AI);
-                tmpEval = Minimax.minimax(board, depth - 1, false, alpha, beta, i);
-                if (tmpEval.getKey() > maxEval) {
-                    maxEval = tmpEval.getKey();
-                    bestMove = i;
-                }
-                Main.remove(i);
+        int bestMove = -1;
+        int maxEval = Integer.MIN_VALUE;
+        char player = ((Main.depth - depth) % 2 == 0) ? Main.AI : Main.HUMAN;
 
-                if (depth == Main.depth)
-                    System.out.println("Collumn: " + i + " Score: " + tmpEval.getKey());
+        for (int i = 0; i < board[0].length; i++) {
+            if (!Main.isValid(i))
+                continue;
+
+            Main.place(i, player);
+            tmpEval = Minimax.nagamax(board, depth - 1, -alpha, -beta, i);
+            // we do -1 couse its nagamax
+            int currentEval = (-1) * tmpEval.getKey();
+
+            if (currentEval > maxEval) {
+                maxEval = currentEval;
+                bestMove = i;
             }
-            return new AbstractMap.SimpleEntry<>(maxEval, bestMove);
-        } else {
-            // tmpEval (minEval, currBest)
-            Map.Entry<Integer, Integer> tmpEval;
-            int minEval = Integer.MAX_VALUE;
-            int bestMove = -1;
-            for (int i = 0; i < board[0].length; i++) {
-                if (!Main.isValid(i))
-                    continue;
+            Main.remove(i);
 
-                Main.place(i, Main.HUMAN);
-                tmpEval = Minimax.minimax(board, depth - 1, true, alpha, beta, i);
-                if (tmpEval.getKey() < minEval) {
-                    minEval = tmpEval.getKey();
-                    bestMove = i;
-                }
-                Main.remove(i);
-            }
-            return new AbstractMap.SimpleEntry<>(minEval, bestMove);
+            if (depth == Main.depth)
+                System.out.println("Collumn: " + i + " Score: " + currentEval);
+
         }
+        return new AbstractMap.SimpleEntry<>(maxEval, bestMove);
     }
 
     static int evaluation(char[][] board) {
