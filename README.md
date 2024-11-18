@@ -1,7 +1,7 @@
 # Connect-4
-Connect 4 but with Minimax algorithm
+Inspiration: http://blog.gamesolver.org/solving-connect-four/01-introduction/ by Pascal Pons
 
-so it just checks 2 or 3 in a row, middle column, win/lose/draw
+Connect 4 but with Minimax algorithm
 
 will optimize later
 
