@@ -10,7 +10,7 @@ public class Main {
 
     // Game state
     static char current_player = HUMAN;
-    static final byte depth =  7;
+    static final byte depth =  10;
 
     // Scanner
     static Scanner sc = new Scanner(System.in);
@@ -45,7 +45,9 @@ public class Main {
         long startTime = System.nanoTime();
 
         // Call nagamax to get the best move
-        int res = Minimax.bestmove(board, depth);
+        Minimax.minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+
+        int res = Minimax.move;
         // Record the end time
         long endTime = System.nanoTime();
 
@@ -74,7 +76,6 @@ public class Main {
         }
 
         place(column_number, current_player);
-        doesXwin(current_player);
         printBoard();
     }
 

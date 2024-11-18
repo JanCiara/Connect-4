@@ -1,4 +1,6 @@
 public class Minimax {
+    static int move = -1;
+
     public static int minimax(char[][] board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         // base case
         if (depth == 0 || Main.game_over()) {
@@ -11,9 +13,17 @@ public class Minimax {
             for (int i = 0; i < board[0].length; i++) {
                 if (!Main.isValid(i))
                     continue;
+
                 Main.place(i, player);
-                maxEval = Math.max(maxEval, minimax(board, depth - 1, alpha, beta, false));
+                int tmpEval = minimax(board, depth - 1, alpha, beta, false);
+                if (maxEval < tmpEval) {
+                    maxEval = tmpEval;
+                    if (depth == Main.depth)
+                        move = i;
+                }
                 Main.remove(i);
+                if (depth == Main.depth)
+                    System.out.println("Column: " + i + " Score: " + tmpEval);
 
                 // Alpha-beta pruning
                 if (maxEval > beta)
@@ -21,16 +31,19 @@ public class Minimax {
                 alpha = Math.max(alpha, maxEval);
             }
             return maxEval;
-        }
-        else {
+        } else {
             int minEval = Integer.MAX_VALUE;
             for (int i = 0; i < board[0].length; i++) {
                 if (!Main.isValid(i))
                     continue;
-                Main.place(i, player);
-                minEval = Math.min(minEval, minimax(board, depth - 1, alpha, beta, true));
-                Main.remove(i);
 
+                Main.place(i, player);
+                int tmpEval = minimax(board, depth - 1, alpha, beta, true);
+
+                if (minEval > tmpEval)
+                    minEval = tmpEval;
+
+                Main.remove(i);
                 // Alpha-beta pruning
                 if (minEval < alpha)
                     break;
@@ -38,24 +51,6 @@ public class Minimax {
             }
             return minEval;
         }
-    }
-
-    static int bestmove(char[][] board, int depth) {
-        int move = -1, score, bestScore = Integer.MIN_VALUE;
-        for (int i = 0; i < board[0].length; i++) {
-            if (!Main.isValid(i))
-                continue;
-            Main.place(i, Main.AI);
-            score = minimax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
-            Main.remove(i);
-
-            if (score > bestScore) {
-                bestScore = score;
-                move = i;
-            }
-            System.out.println("Column: " + i + " Score: " + score);
-        }
-        return move;
     }
 
     static int evaluation(char[][] board) {
