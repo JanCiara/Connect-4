@@ -1,3 +1,6 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Connect4Bitboard {
@@ -7,8 +10,41 @@ public class Connect4Bitboard {
     private long player2Bitboard = 0L;
     private int currentTurn = 1;
     private int bestMove = 0;
-    private final int depth = 14;
+    private final int depth = 16;
     private final int[] moveOrder = {3, 2, 4, 1, 5, 0, 6};
+    private final Map<Long, Integer> transpositionTable = new HashMap<>();
+    private final long[][][] zobristTable;
+    public static long counter = 0;
+
+    public Connect4Bitboard() {
+        zobristTable = new long[boardWidth][boardHeight][2];
+        initializeZobristTable();
+    }
+
+    private void initializeZobristTable() {
+        Random random = new Random();
+        for (int col = 0; col < boardWidth; col++) {
+            for (int row = 0; row < boardHeight; row++) {
+                zobristTable[col][row][0] = random.nextLong();
+                zobristTable[col][row][1] = random.nextLong();
+            }
+        }
+    }
+
+    public long hashPosition() {
+        long hash = 0L;
+        for (int col = 0; col < boardWidth; col++) {
+            for (int row = 0; row < boardHeight; row++) {
+                long mask = 1L << (col + row * boardWidth);
+                if ((player1Bitboard & mask) != 0) {
+                    hash ^= zobristTable[col][row][0];
+                } else if ((player2Bitboard & mask) != 0) {
+                    hash ^= zobristTable[col][row][1];
+                }
+            }
+        }
+        return hash;
+    }
 
     public void dropPiece(int column) {
         if (column < 0 || column >= boardWidth) {
@@ -79,11 +115,15 @@ public class Connect4Bitboard {
     }
 
     public int minimax(boolean maximizingPlayer, int depth, int alpha, int beta) {
+        counter++;
         if (depth == 0 || getWinner() != 0) {
             return evaluateBoard();
         }
-
-        // Maximizing player will always be player 2 - AI
+        long curr_hash = hashPosition();
+        if (transpositionTable.containsKey(curr_hash)) {
+            if (depth != this.depth)
+                return transpositionTable.get(curr_hash);
+        }
         if (maximizingPlayer) {
             int maxScore = Integer.MIN_VALUE;
             for (int i = 0; i < boardWidth; i++) {
@@ -96,22 +136,17 @@ public class Connect4Bitboard {
                 if (score > maxScore) {
                     maxScore = score;
                     if (depth == this.depth) {
-                        bestMove = moveOrder[i];
+                        bestMove = move;
                     }
                 }
-                if (depth == this.depth) {
-                    System.out.println("Column: " + move + ", Score: " + score);
-                }
-                if (maxScore > beta)
-                {
-                    break;
+                if (maxScore >= beta) {
+                    return maxScore;
                 }
                 alpha = Math.max(alpha, score);
             }
+            transpositionTable.put(curr_hash, maxScore);
             return maxScore;
-        }
-        // Minimizing player will always be player 1 - human
-        else {
+        } else {
             int minScore = Integer.MAX_VALUE;
             for (int i = 0; i < boardWidth; i++) {
                 int move = moveOrder[i];
@@ -123,12 +158,12 @@ public class Connect4Bitboard {
                 if (score < minScore) {
                     minScore = score;
                 }
-                if (minScore < alpha)
-                {
-                    break;
+                if (minScore <= alpha) {
+                    return minScore;
                 }
                 beta = Math.min(beta, score);
             }
+            transpositionTable.put(curr_hash, minScore);
             return minScore;
         }
     }
@@ -158,7 +193,9 @@ public class Connect4Bitboard {
 
     public int evaluateBoard() {
         int score = 0;
+        // Human player
         score -= evaluateBitboard(player1Bitboard);
+        // AI player
         score += evaluateBitboard(player2Bitboard);
         return score;
     }
@@ -216,12 +253,14 @@ public class Connect4Bitboard {
             game.minimax(true, game.depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
             long endTime = System.currentTimeMillis();
             System.out.println("Time taken to calculate best move: " + (endTime - startTime) + " ms");
-            
+
             column = game.bestMove;
             if (!game.isValidMove(column)) {
                 throw new IllegalArgumentException("AI tried to make invalid move");
             }
             game.dropPiece(column);
+            System.out.println(counter + " positions evaluated");
+            counter = 0;
         }
         game.printBoard();
         System.out.println("Player " + game.getWinner() + " wins!");
